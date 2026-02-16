@@ -1,0 +1,16 @@
+{
+  "scores": {
+    "protocol": {
+      "earned": 0,
+      "available": 20
+    },
+    "structure": {
+      "earned": 10,
+      "available": 10
+    }
+  },
+  "total": {
+    "earned": 10,
+    "available": 30
+  }
+}
