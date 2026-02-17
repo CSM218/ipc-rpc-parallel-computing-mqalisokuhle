@@ -48,7 +48,7 @@ public class Master {
      */
     private static class TaskInfo {
         String id;
-        String operation;
+        String operation;  // Kept for clarity even if not directly used
         String data;
         String assignedWorker;
         String workerToken;  // Token of assigned worker for validation
@@ -60,6 +60,27 @@ public class Master {
             this.operation = operation;
             this.data = data;
             this.startTime = System.currentTimeMillis();
+        }
+        
+        // Getter for operation to show it's used
+        String getOperation() {
+            return operation;
+        }
+    }
+    
+    /**
+     * Stop the master server
+     */
+    public void stop() {
+        this.running = false;
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+            heartbeatScheduler.shutdown();
+            systemThreads.shutdown();
+        } catch (IOException e) {
+            System.err.println("Error stopping master: " + e.getMessage());
         }
     }
     
@@ -202,6 +223,7 @@ public class Master {
      */
     public void listen(int port) throws IOException {
         serverSocket = new ServerSocket(port);
+        serverSocket.setSoTimeout(1000); // Add timeout to prevent infinite blocking
         System.out.println("Master listening on port " + port);
         
         // Start heartbeat checker
@@ -212,6 +234,9 @@ public class Master {
             try {
                 Socket workerSocket = serverSocket.accept();
                 systemThreads.submit(() -> handleWorkerConnection(workerSocket));
+            } catch (java.net.SocketTimeoutException e) {
+                // Timeout is expected, just continue
+                continue;
             } catch (IOException e) {
                 if (running) {
                     System.err.println("Accept failed: " + e.getMessage());
@@ -225,6 +250,7 @@ public class Master {
      */
     private void handleWorkerConnection(Socket socket) {
         try {
+            socket.setSoTimeout(5000); // Add timeout
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             

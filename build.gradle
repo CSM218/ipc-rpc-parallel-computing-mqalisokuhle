@@ -1,5 +1,6 @@
-// build.gradle - With JUnit dependencies for tests
-apply plugin: 'java'
+plugins {
+    id 'java'
+}
 
 repositories {
     mavenCentral()
@@ -7,19 +8,13 @@ repositories {
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {
     useJUnitPlatform()
-    // Skip tests if they're causing issues
-    enabled = false
 }
 
-// Optimize for speed
-compileJava {
-    options.compilerArgs << "-Xlint:none"
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
-
-// Disable test compilation if you want to skip tests entirely
-// compileTestJava.enabled = false
